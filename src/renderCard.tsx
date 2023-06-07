@@ -180,7 +180,139 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     // (hideProfile ? 32 : 110) + (activityCount * 136) + (activityGapCount * 6)
     const svgSize = (hideProfile ? 32 : 104) + (activityCount * (136 + 6));
 
-    
+    const profileComponent = `
+        <div style="${hideProfile ? "display: none;" : "display: flex;"} width: auto; background: rgb(255,255,255,0.0512); min-height: 72px; border-radius: 8px; inset: 0; flex-direction: row; overflow: hidden;">
+            <div title="avatar-box" style="display: grid; place-items: center;aspect-ratio: 1;width: 72px;min-width: 72px;">
+                <div style=" height: 52px; aspect-ratio: 1; background: url('data:image/png;base64,${avatar}') no-repeat; background-size: cover; box-shadow: 0 0 0 2px #f23f43; border-radius: 4px;"></div>
+            </div>
+            <div title="header-box" style="width: 100%; padding: 4px 8px 7px 8px; display: flex; align-self: center; flex-direction: column; gap: 2px;">
+                <div title="row-1" style="display: flex; flex-direction: row; gap: 6px;">
+                    <p style="font-family: 'Segoe UI Variable Display', sans-serif; font-weight: 600; font-size: 16px; margin: 0;">
+                        ${!data.discord_user.discriminator ? escape(data.discord_user.display_name) : escape(data.discord_user.username) }
+                    </p>
+                    ${ discrim ? `<div title="username-box" style="display: flex; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605); font-family: 'Segoe UI Variable Small'; font-size: 10px; align-items: center; padding: 2px; border-radius: 2px;">
+                        <p style="margin: 0;">
+                            ${!data.discord_user.discriminator ? "#"+data.discord_user.discriminator : "@"+data.discord_user.username}
+                        </p>
+                    </div>`: ""
+                    }
+                    ${
+                        (!hideBadges ? flags.map(v => `
+                        <div title="badges" style="display: flex; flex-direction: row; gap: 4px;">
+                            <div title="badge" style="display: flex; padding: 2px; border-radius: 2px; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605);">
+                                <div style="background: url('data:image/png;base64,${Badges[v]}') no-repeat; background-size: contain; background-position: center; height: 16px; aspect-ratio: 1;"></div>
+                            </div>
+                        </div>`) : []).join('')
+                    }
+                </div>
+                <div title="row-2" style="display: flex; flex-direction: row; align-items: center; gap: 4px;">
+                    <img style="height: 14px; border-radius: 2px;" src="https://cdn.discordapp.com/emojis/1113372259835449394.gif"/>
+                    <p style="font-family: 'Segoe UI Variable Text'; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
+                        Bruh
+                    </p>
+                </div>
+            </div>
+        </div>
+    `
+
+    let presenceTitle: string;
+    switch (escape(activity.name.toLowerCase()))
+    { 
+        case 'code': 
+            presenceTitle = 'Coding stuff'; 
+            break; 
+        case 'aimp':
+            presenceTitle = 'Listening to AIMP'
+            break;
+        default: 
+            presenceTitle = 'Playing a game';
+    };
+
+    const presenceComponent = activity ? `
+    <div style="
+        display: flex; 
+        position: relative; 
+        background: rgb(255,255,255,0.0512); 
+        border-radius: 8px; 
+        flex-direction: row; 
+        padding: 8px; 
+        height: 100%;
+        width: auto; 
+        top: 0; 
+        bottom: 0;">
+        <div title="presence" style="
+            display: flex; 
+            flex-direction: column;">
+            <p style="
+                margin: 0; 
+                font-weight: 600; 
+                font-size: 14px; 
+                font-family: 'Segoe UI Variable Display'; 
+                margin-left: 8px; 
+                margin-top: 4px;">
+                ${presenceTitle}
+            </p>
+            <div title="presenceData" style="
+                display: flex; 
+                flex-direction: row;
+                margin-top: 1px;
+                margin-left: 8px;"> 
+                <div title="largeImageKey" style="
+                    background-image: url('data:image/png;base64,${
+                        activity.assets?.large_image ? await encodeBase64(
+                            activity.assets?.large_image?.startsWith("mp:external/")
+                        ? `https://media.discordapp.net/external/${activity.assets.large_image.replace("mp:external/", "")}` 
+                        : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.webp`
+                        ) : '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'}'); 
+                    background-size: cover; 
+                    aspect-ratio: 1; 
+                    width: 72px; 
+                    height: 72px; 
+                    margin: 8px 8px; 
+                    border-radius: 8px;">
+                </div>
+                <div title="presenceText" style="
+                    display: flex; 
+                    flex-direction: column; 
+                    align-self: center; 
+                    width: 280px; 
+                    margin-top: -5px">
+                    <div title="activityName" style="
+                        font-family: 'Segoe UI Variable Text', sans-serif; 
+                        font-size: 13px; 
+                        font-weight: 600;">
+                        <p style="margin: 0;">${escape(activity.name)}</p>
+                    </div>
+                    <div title="presenceDetails" style="
+                        font-family: 'Segoe UI Variable Text'; 
+                        font-size: 12px; 
+                        font-weight: 400 ;">
+                        <p style="margin: 0;">
+                            ${escape(activity.details ? activity.details : '' )}
+                        </p>
+                    </div>
+                    <div title="presenceState" style="
+                        font-family: 'Segoe UI Variable Text'; 
+                        font-size: 12px; 
+                        font-weight: 400 ;">
+                        <p style="margin: 0;">
+                            ${escape(activity.state ? activity.state : '' )}
+                        </p>
+                    </div>
+                    <div title="presenceTimeStamp" style="
+                        font-family: 'Segoe UI Variable Text'; 
+                        font-size: 12px; 
+                        font-weight: 400 ;">
+                        <p style="margin: 0;">
+                            ${activity.timestamps ? elapsedTime(new Date(activity.timestamps.start).getTime()) : null} elapsed
+                        </p>
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+    ` : ''
+
     // (spotifyPercentual / 100) * 280
     const spotifyComponent = spotifyData ? `
     <div style="
@@ -282,104 +414,6 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     </div>
     ` : ''
 
-    let presenceTitle: string;
-    switch (escape(activity.name.toLowerCase()))
-    { 
-        case 'code': 
-            presenceTitle = 'Coding stuff'; 
-            break; 
-        case 'aimp':
-            presenceTitle = 'Listening to AIMP'
-            break;
-        default: 
-            presenceTitle = 'Playing a game';
-    };
-
-    const presenceComponent = activity ? `
-    <div style="
-        display: flex; 
-        position: relative; 
-        background: rgb(255,255,255,0.0512); 
-        border-radius: 8px; 
-        flex-direction: row; 
-        padding: 8px; 
-        height: 100%;
-        width: auto; 
-        top: 0; 
-        bottom: 0;">
-        <div title="presence" style="
-            display: flex; 
-            flex-direction: column;">
-            <p style="
-                margin: 0; 
-                font-weight: 600; 
-                font-size: 14px; 
-                font-family: 'Segoe UI Variable Display'; 
-                margin-left: 8px; 
-                margin-top: 4px;">
-                ${presenceTitle}
-            </p>
-            <div title="presenceData" style="
-                display: flex; 
-                flex-direction: row;
-                margin-top: 1px;
-                margin-left: 8px;"> 
-                <div title="largeImageKey" style="
-                    background-image: url('data:image/png;base64,${
-                        activity.assets?.large_image ? await encodeBase64(
-                            activity.assets?.large_image?.startsWith("mp:external/")
-                        ? `https://media.discordapp.net/external/${activity.assets.large_image.replace("mp:external/", "")}` 
-                        : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.webp`
-                        ) : 'iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAV1SURBVHgB7Z09SGNLFMdH4/qVjZH3okFBEBT8qMRCwcJKtFBEEQQLK8FCQQyClaJglyZiI4iKjZYKdoqtgmBr4QdYBPLIZvUlRmPiRn33wAvsit47ms2Smf/5wRabOyoyvzl35tzjuTkvLy92wcCSKxhoWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABw8gQIZ2dnudvb2/mnp6dF4XA4//Hx0UafJ5PJ3Ly8vOfCwsJkSUnJj9ra2vj8/PyDACFH9xYxBwcHeRsbG45AIGB/enqSing2m+3Z5XI9jI6ORjo6OpJCY7QVgFb8wsKC0+/3O0QaVFVVRX0+X7isrOxFaIiWAtCq93q95YlE4rfc4goKCpLT09PfdIwG2gmwtbWVv7q6Wi4b7mUhCcbGxkJ9fX0/hEZodQqglZ+JyScomiwtLbnpZwiN0CYC/O6w/x4UCTY3N//RZU+gTQRYWVlxZnryCfoZHo+nVGiCFuGMVn8wGJSKZE6nM15fX//Q2dn5kNrU0b7h/Pz8y8nJyddoNFpg9T3oZLG2thYbGRlJCMXR4hYwODj4t5UAdLbv7u6+npqaMk3yGEkg+9HRkWU0IZF2d3e/CcVR/hYgs/pp8icmJoJWk08YAtwb+YMgfY3ZuEgkUhgKhXKE4igvwN7enmXIbm9v//cjx7fW1tangYGB71bjDFm+CsVRXoDLy8tis+sUqmlViw8yPj4edzgcpvd4IwLkC8VRXgDjXm0zu97c3PzhyU/R0NBwZ3bdeKhkGX2yHeUFiMfjppu1pqamR/FJurq6TCMAPUkUiqP8L2CV9UsndWuV+89ExvFPo/wvYLZbt9rJMxoIUFxc/O4Kd7vdMZEGlCAyu66DYMoLMDs7+53y868/p88mJycjIg0ODw9NN3lURSQUR3kB6MxOiZvKyso7mnT6V11dfUuf0TXxSSjBdHFxYVpMYhwxP73BzBa0Lwn7LP39/WU3NzdFZmN6e3tDMtnFbIYFeAPjIY/TSDA5zcZQpNnf3w8IxeGy8FfITD7R1taW1v4iW+AI8BOyk6/L6ic4AvyP7OQTVBsoNAHmD0PMGBoa+isQCEg92TOeLYR1KgyFF6Cnp8ctUwVE0OT7fL5boRHQtwBa+bKTX1NTc6fb5BOwAtA9Xzbs0+Svr6/fCA2BFICyfLIbvsbGxltdJ5+AFIBKyGXG0T1/eXk5LDQGTgDZEnIdN3xvAScA/am41RiUySfgBKDmEGbXXS5XDGXyCTgBYrHYF7Prw8PDWuT4ZYETIJM1hCoCJwDXEP4KnACZrCFUETgBMllDqCKQ9QDHx8e2xcVF5/X1dSH9v6KiImY84o2mU0OoKlwQAg4XhIDDAoDDAoDDAoDDAoDDAoDDAoADVxVMXcS9Xq/D7/fbU63gKAtYWlqaQGgP/xqoRJBVO1mdu4K/B4wAsr2EdesFbAXMHmBnZ6dIppcwjZmZmUnrJRMqASPA1dWVdKQzxirfAFIWGAHu7++lmzr+ia7j2QIfA8GBEcCq7evP2O125Xv/yAIjgNvtjsuObWlpiQoQYI6BlADyeDzlVnsBnbp/yAATAerq6p7n5uZCb9UDpqDQT+3lBBCQJWH0VhB6PUzq9bHU8JFeI2MkimBCfwquCQSHj4HgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADg/AcaTCq+Wg3S6QAAAABJRU5ErkJggg=='}'); 
-                    background-size: cover; 
-                    aspect-ratio: 1; 
-                    width: 72px; 
-                    height: 72px; 
-                    margin: 8px 8px; 
-                    border-radius: 8px;">
-                </div>
-                <div title="presenceText" style="
-                    display: flex; 
-                    flex-direction: column; 
-                    align-self: center; 
-                    width: 280px; 
-                    margin-top: -5px">
-                    <div title="activityName" style="
-                        font-family: 'Segoe UI Variable Text', sans-serif; 
-                        font-size: 13px; 
-                        font-weight: 600;">
-                        <p style="margin: 0;">${escape(activity.name)}</p>
-                    </div>
-                    <div title="presenceDetails" style="
-                        font-family: 'Segoe UI Variable Text'; 
-                        font-size: 12px; 
-                        font-weight: 400 ;">
-                        <p style="margin: 0;">
-                            ${escape(activity.details ? activity.details : '' )}
-                        </p>
-                    </div>
-                    <div title="presenceState" style="
-                        font-family: 'Segoe UI Variable Text'; 
-                        font-size: 12px; 
-                        font-weight: 400 ;">
-                        <p style="margin: 0;">
-                            ${escape(activity.state ? activity.state : '' )}
-                        </p>
-                    </div>
-                    <div title="presenceTimeStamp" style="
-                        font-family: 'Segoe UI Variable Text'; 
-                        font-size: 12px; 
-                        font-weight: 400 ;">
-                        <p style="margin: 0;">
-                            ${activity.timestamps ? elapsedTime(new Date(activity.timestamps.start).getTime()) : null} elapsed
-                        </p>
-                    </div> 
-                </div>
-            </div>
-        </div>
-    </div>
-    ` : ''
-
     return `
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="440" height="${svgSize}">
     <link xmlns="" type="text/css" rel="stylesheet" id="dark-mode-custom-link"/>
@@ -388,39 +422,26 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     <style xmlns="" lang="en" type="text/css" id="dark-mode-native-style"/>
     <style xmlns="" lang="en" type="text/css" id="dark-mode-native-sheet"/>
     <foreignObject x="0" y="0" width="440" height="${svgSize}">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="position: absolute; top: 8px; bottom: 8px; left: 8px; right: 8px; gap: 6px; background-color: rgba(30, 30, 30, 0.8 ); color: #fff; font-family: 'Segoe UI Variable Text','Century Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; display: flex; flex-direction: column; padding: 8px; border-radius: 8px; backdrop-filter: blur(240px); margin: 0; box-shadow: 0 0 8px rgba(0,0,0, 0.55);">
-            <div style="${hideProfile ? "display: none;" : "display: flex;"} width: auto; background: rgb(255,255,255,0.0512); min-height: 72px; border-radius: 8px; inset: 0; flex-direction: row; overflow: hidden;">
-                <div title="avatar-box" style="display: grid; place-items: center;aspect-ratio: 1;width: 72px;min-width: 72px;">
-                    <div style=" height: 52px; aspect-ratio: 1; background: url('https://api.lanyard.rest/${data.discord_user.id}.gif') no-repeat; background-size: cover; box-shadow: 0 0 0 2px #f23f43; border-radius: 4px;"></div>
-                </div>
-                <div title="header-box" style="width: 100%; padding: 4px 8px 7px 8px; display: flex; align-self: center; flex-direction: column; gap: 2px;">
-                    <div title="row-1" style="display: flex; flex-direction: row; gap: 6px;">
-                        <p style="font-family: 'Segoe UI Variable Display', sans-serif; font-weight: 600; font-size: 16px; margin: 0;">
-                            ${!data.discord_user.discriminator ? escape(data.discord_user.display_name) : escape(data.discord_user.username) }
-                        </p>
-                        ${ discrim ? `<div title="username-box" style="display: flex; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605); font-family: 'Segoe UI Variable Small'; font-size: 10px; align-items: center; padding: 2px; border-radius: 2px;">
-                            <p style="margin: 0;">
-                                ${!data.discord_user.discriminator ? "#"+data.discord_user.discriminator : "@"+data.discord_user.username}
-                            </p>
-                        </div>`: ""
-                        }
-                        ${
-                            (!hideBadges ? flags.map(v => `
-                            <div title="badges" style="display: flex; flex-direction: row; gap: 4px;">
-                                <div title="badge" style="display: flex; padding: 2px; border-radius: 2px; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605);">
-                                    <div style="background: url('data:image/png;base64,${Badges[v]}') no-repeat; background-size: contain; background-position: center; height: 16px; aspect-ratio: 1;"></div>
-                                </div>
-                            </div>`) : []).join('')
-                        }
-                    </div>
-                    <div title="row-2" style="display: flex; flex-direction: row; align-items: center; gap: 4px;">
-                        <img style="height: 14px; border-radius: 2px;" src="https://cdn.discordapp.com/emojis/1113372259835449394.gif"/>
-                        <p style="font-family: 'Segoe UI Variable Text'; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
-                            Bruh
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            display: flex; 
+            flex-direction: column; 
+            position: absolute; 
+            border-radius: 8px; 
+            top: 8px; 
+            left: 8px; 
+            right: 8px; 
+            bottom: 8px; 
+            margin: 0; 
+            gap: 6px; 
+            padding: 8px; 
+            background-color: rgba(30, 30, 30, 0.8 ); 
+            backdrop-filter: blur(240px); 
+            -webkit-backdrop-filter: blur(240px);
+            font-family: 'Segoe UI Variable Text','Century Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-size: 16px; 
+            color: #fff; 
+            box-shadow: 0 0 8px rgba(0,0,0, 0.55);">
+            ${profileComponent}
             ${presenceComponent}
             ${spotifyComponent}
         </div>

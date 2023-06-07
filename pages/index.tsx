@@ -62,7 +62,7 @@ export default function Home({ userCount }: { userCount: number }) {
                     <Input onChange={el => setUserId(el.target.value)} placeholder="Enter your Discord ID" />
                     {userId ? (
                         <>
-                            <Output>
+                            <Output onChange={() => alert(userId)}>
                                 [![Discord Presence](https://lanyard.cnrad.dev/api/{userId}
                                 )](https://discord.com/users/{userId})
                             </Output>
@@ -141,7 +141,7 @@ const Main = styled.div`
     box-sizing: border-box;
     max-width: 100vw;
     min-height: 100vh;
-    background: #010103;
+    background: url('https://i.imgur.com/k8g0YPh.jpg');
     background-size: cover;
 `;
 
