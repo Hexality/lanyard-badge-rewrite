@@ -22,13 +22,20 @@ type Parameters = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     let getUser;
-    const params: Parameters = req.query,
-        userId = req.query.id[0];
+    let userId;
 
-    if (!isSnowflake(userId))
-        return res.send({
-            error: `That is not a valid snowflake ID!`,
-        });
+    const params: Parameters = req.query;
+    function queryExists(v = req.query) {
+        if(v !== undefined) {
+            userId = v.id ? v.id.toString() : ''
+            if (!isSnowflake(userId))
+                return res.send({
+                    error: `That is not a valid snowflake ID!`,
+                });
+        }
+    }
+    
+    queryExists()
 
     try {
         getUser = await axios(`https://api.lanyard.rest/v1/users/${userId}`);
@@ -48,8 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 
     try {
-        let user = await redis.hget("users", userId);
-        if (!user) await redis.hset("users", userId, "true");
+        let user = await redis.hget("users", userId ? userId : '');
+        if (!user) await redis.hset("users", userId ? userId : '', "true");
     } catch {
         null;
     }
