@@ -69,6 +69,7 @@ export interface Timestamps2 {
 }
 
 export interface Party {
+    size: any;
     id: string;
 }
 

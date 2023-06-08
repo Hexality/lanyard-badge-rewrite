@@ -336,7 +336,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                             display: -webkit-box; 
                             -webkit-line-clamp: 1; 
                             -webkit-box-orient: vertical;">
-                            ${escape(activity.state ? activity.state : '' )}${activity.party.size ? ` (${activity.party.size[0]} of ${activity.party.size[1]})` : ''}
+                            ${escape(activity.state ? activity.state : '' )}${(activity.party?.size) ? ` (${activity.party?.size[0]} of ${activity.party?.size[1]})` : ''}
                         </p>
                     </div>` : ''}
                     ${activity.timestamps ? `<div title="presenceTimeStamp" style="
