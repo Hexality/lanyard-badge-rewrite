@@ -13,11 +13,11 @@ type Data = {
 type Parameters = {
     theme?: string;
     bg?: string;
-    hideStatus?: string;
-    hideTimestamp?: string;
-    hideDiscrim?: string;
-    borderRadius?: string;
-    animated?: string;
+    hideStatus?: boolean;
+    hideTimestamp?: boolean;
+    hideDiscrim?: boolean;
+    borderRadius?: number;
+    animated?: boolean;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
