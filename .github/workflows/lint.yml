@@ -23,6 +23,6 @@ jobs:
               run: npm add react
 
             - name: Run ESLint
-              run: npm lint
+              run: yarn lint
               env:
                   CI: true
