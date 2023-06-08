@@ -6,6 +6,7 @@ import * as LanyardTypes from "./LanyardTypes";
 import { encodeBase64 } from "./toBase64";
 import { blue, green, gray, gold, red } from "./defaultAvatars";
 import escape from "escape-html";
+import { useTheme } from "styled-components";
 
 type Parameters = {
     theme?: string;
@@ -13,6 +14,7 @@ type Parameters = {
     animated?: boolean;
     hideDiscrim?: boolean;
     hideStatus?: boolean;
+    hidePresence?: boolean;
     hideTimestamp?: boolean;
     hideBadges?: boolean;
     hideProfile?: boolean;
@@ -91,6 +93,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
         hideTimestamp = false,
         hideBadges = false,
         hideProfile = false,
+        hidePresence = false,
         borderRadius = 8,
         idleBox = false;
 
@@ -102,6 +105,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     if (params.hideBadges) hideBadges = true;
     if (params.hideDiscrim) discrim = false;
     if (params.hideProfile) hideProfile = true;
+    if (params.hidePresence) hidePresence = true;
     if (params.theme === "light") {
         backgroundColor = "#eee";
         theme = "light";
@@ -162,6 +166,11 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     let userStatus: Record<string, any> | null = null;
     if (data.activities[0] && data.activities[0].type === 4) userStatus = data.activities[0];
 
+    const customStatus = data.activities.filter((u) => u.type === 4)
+    const emojiStatusUrl = await encodeBase64(customStatus.map(i => i.emoji ? `https://cdn.discordapp.com/emojis/${i.emoji?.id}.${i.emoji?.animated ? 'gif' : 'png'}` : '').toString())
+    const emojiFormat = customStatus.map((i) => i.emoji?.animated ? 'gif' : 'png')
+    const emojiStatus = `data:image/${emojiFormat};base64,${emojiStatusUrl}`
+
     // Filter only type 0
     const activities = data.activities.filter(activity => activity.type === 0);
 
@@ -174,25 +183,27 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
     const activityCount = 
         (!!activity ? 1 : 0) +
         (!!spotifyData ? 1 : 0);
-    
+
     // 246 -> 110
     // 168 -> 32
     // (hideProfile ? 32 : 110) + (activityCount * 136) + (activityGapCount * 6)
-    const svgSize = (hideProfile ? 32 : 104) + (activityCount * (136 + 6));
+    const profileSize = (hideProfile ? 32 : 104)
+    const presenceSize = (!hidePresence ? (activityCount * (136 + 6)): 0)
+    const svgSize = profileSize + presenceSize;
 
     const profileComponent = `
-        <div style="${hideProfile ? "display: none;" : "display: flex;"} width: auto; background: rgb(255,255,255,0.0512); min-height: 72px; border-radius: 8px; inset: 0; flex-direction: row; overflow: hidden;">
+        <div style="display: flex; width: auto; background: rgb(255,255,255,0.0512); min-height: 72px; border-radius: 8px; inset: 0; flex-direction: row; overflow: hidden;">
             <div title="avatar-box" style="display: grid; place-items: center;aspect-ratio: 1;width: 72px;min-width: 72px;">
-                <div style=" height: 52px; aspect-ratio: 1; background: url('data:image/png;base64,${avatar}') no-repeat; background-size: cover; box-shadow: 0 0 0 2px #f23f43; border-radius: 4px;"></div>
+                <div style=" height: 52px; aspect-ratio: 1; background: url('data:image/png;base64,${avatar}') no-repeat; background-size: cover; box-shadow: 0 0 0 2px ${avatarBorderColor}; border-radius: 4px;"></div>
             </div>
             <div title="header-box" style="width: 100%; padding: 4px 8px 7px 8px; display: flex; align-self: center; flex-direction: column; gap: 2px;">
                 <div title="row-1" style="display: flex; flex-direction: row; gap: 6px;">
                     <p style="font-family: 'Segoe UI Variable Display', sans-serif; font-weight: 600; font-size: 16px; margin: 0;">
-                        ${!data.discord_user.discriminator ? escape(data.discord_user.display_name) : escape(data.discord_user.username) }
+                        ${(data.discord_user.discriminator === '0') ? escape(data.discord_user.display_name) : escape(data.discord_user.username) }
                     </p>
                     ${ discrim ? `<div title="username-box" style="display: flex; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605); font-family: 'Segoe UI Variable Small'; font-size: 10px; align-items: center; padding: 2px; border-radius: 2px;">
                         <p style="margin: 0;">
-                            ${!data.discord_user.discriminator ? "#"+data.discord_user.discriminator : "@"+data.discord_user.username}
+                            ${!(data.discord_user.discriminator === '0') ? "#"+data.discord_user.discriminator : "@"+data.discord_user.username}
                         </p>
                     </div>`: ""
                     }
@@ -205,28 +216,23 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                         </div>`) : []).join('')
                     }
                 </div>
+                ${!(customStatus.length === 0) ? `
                 <div title="row-2" style="display: flex; flex-direction: row; align-items: center; gap: 4px;">
-                    <img style="height: 14px; border-radius: 2px;" src="https://cdn.discordapp.com/emojis/1113372259835449394.gif"/>
+                    ${emojiStatusUrl ? `<img style="height: 14px; border-radius: 2px;" src="${emojiStatus}"/>` : ''}
                     <p style="font-family: 'Segoe UI Variable Text'; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
-                        Bruh
+                        ${customStatus.map(i => i.state ? i.state : '')}
                     </p>
                 </div>
+                ` : ''}
             </div>
         </div>
     `
 
     let presenceTitle: string;
-    switch (escape(activity.name.toLowerCase()))
-    { 
-        case 'code': 
-            presenceTitle = 'Coding stuff'; 
-            break; 
-        case 'aimp':
-            presenceTitle = 'Listening to AIMP'
-            break;
-        default: 
-            presenceTitle = 'Playing a game';
-    };
+    presenceTitle = {
+        'code': 'Coding stuff',
+        'aimp': 'Listening to APIM',
+    }[escape(activity?.name?.toLowerCase?.())] ?? 'Playing a game';
 
     const presenceComponent = activity ? `
     <div style="
@@ -250,7 +256,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 font-family: 'Segoe UI Variable Display'; 
                 margin-left: 8px; 
                 margin-top: 4px;">
-                ${presenceTitle}
+                ${presenceTitle ? presenceTitle : ''}
             </p>
             <div title="presenceData" style="
                 display: flex; 
@@ -264,12 +270,30 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                         ? `https://media.discordapp.net/external/${activity.assets.large_image.replace("mp:external/", "")}` 
                         : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.webp`
                         ) : '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'}'); 
-                    background-size: cover; 
-                    aspect-ratio: 1; 
-                    width: 72px; 
-                    height: 72px; 
-                    margin: 8px 8px; 
-                    border-radius: 8px;">
+                        display: flex; 
+                        background-size: cover; 
+                        aspect-ratio: 1; 
+                        width: 72px; 
+                        height: 72px; 
+                        margin: 8px 8px; 
+                        border-radius: 8px; 
+                        justify-content:flex-end; 
+                        align-items:flex-end">
+                    ${ activity.assets?.small_image ? `<div title="smallImageText" style="
+                        background-image: url('data:image/png;base64,${
+                            await encodeBase64(
+                                activity.assets?.small_image?.startsWith("mp:external/")
+                            ? `https://media.discordapp.net/external/${activity.assets?.small_image.replace("mp:external/", "")}` 
+                            : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets?.small_image}.webp`
+                            )}'); 
+                        background-size: contain; 
+                        border-radius: 50%; 
+                        width: 22px; 
+                        height: 22px; 
+                        aspect-ratio: 1; 
+                        position: relative; 
+                        right: -3px; 
+                        bottom: -3px"/>` : '' }
                 </div>
                 <div title="presenceText" style="
                     display: flex; 
@@ -277,36 +301,57 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                     align-self: center; 
                     width: 280px; 
                     margin-top: -5px">
-                    <div title="activityName" style="
+                    ${activity.name ? `<div title="activityName" style="
                         font-family: 'Segoe UI Variable Text', sans-serif; 
                         font-size: 13px; 
                         font-weight: 600;">
-                        <p style="margin: 0;">${escape(activity.name)}</p>
-                    </div>
-                    <div title="presenceDetails" style="
+                        <p style="
+                            margin: 0;
+                            overflow: hidden; 
+                            display: -webkit-box; 
+                            -webkit-line-clamp: 1; 
+                            -webkit-box-orient: vertical;">
+                            ${escape(activity.name)}</p>
+                    </div>` : ''}
+                    ${activity.details ? `<div title="presenceDetails" style="
                         font-family: 'Segoe UI Variable Text'; 
                         font-size: 12px; 
                         font-weight: 400 ;">
-                        <p style="margin: 0;">
+                        <p style="
+                            margin: 0; 
+                            overflow: hidden; 
+                            display: -webkit-box; 
+                            -webkit-line-clamp: 1; 
+                            -webkit-box-orient: vertical;">
                             ${escape(activity.details ? activity.details : '' )}
                         </p>
-                    </div>
-                    <div title="presenceState" style="
+                    </div>` : ''}
+                    ${activity.state ? `<div title="presenceState" style="
                         font-family: 'Segoe UI Variable Text'; 
                         font-size: 12px; 
                         font-weight: 400 ;">
-                        <p style="margin: 0;">
-                            ${escape(activity.state ? activity.state : '' )}
+                        <p style="
+                            margin: 0;
+                            overflow: hidden; 
+                            display: -webkit-box; 
+                            -webkit-line-clamp: 1; 
+                            -webkit-box-orient: vertical;">
+                            ${escape(activity.state ? activity.state : '' )}${activity.party.size ? ` (${activity.party.size[0]} of ${activity.party.size[1]})` : ''}
                         </p>
-                    </div>
-                    <div title="presenceTimeStamp" style="
+                    </div>` : ''}
+                    ${activity.timestamps ? `<div title="presenceTimeStamp" style="
                         font-family: 'Segoe UI Variable Text'; 
                         font-size: 12px; 
                         font-weight: 400 ;">
-                        <p style="margin: 0;">
-                            ${activity.timestamps ? elapsedTime(new Date(activity.timestamps.start).getTime()) : null} elapsed
+                        <p style="
+                            margin: 0;
+                            overflow: hidden; 
+                            display: -webkit-box; 
+                            -webkit-line-clamp: 1; 
+                            -webkit-box-orient: vertical;">
+                            ${elapsedTime(new Date(activity.timestamps.start).getTime())} elapsed
                         </p>
-                    </div> 
+                    </div>` : ''}
                 </div>
             </div>
         </div>
@@ -441,9 +486,9 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
             font-size: 16px; 
             color: #fff; 
             box-shadow: 0 0 8px rgba(0,0,0, 0.55);">
-            ${profileComponent}
-            ${presenceComponent}
-            ${spotifyComponent}
+            ${!hideProfile ? profileComponent : ''}
+            ${!hidePresence ? presenceComponent: ''}
+            ${!hidePresence ? spotifyComponent : ''}
         </div>
     </foreignObject>
 </svg>
