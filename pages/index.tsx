@@ -62,7 +62,7 @@ export default function Home({ userCount }: { userCount: number }) {
                     <Input onChange={el => setUserId(el.target.value)} placeholder="Enter your Discord ID" />
                     {userId ? (
                         <>
-                            <Output onChange={() => alert(userId)}>
+                            <Output>
                                 [![Discord Presence](https://lanyard.cnrad.dev/api/{userId}
                                 )](https://discord.com/users/{userId})
                             </Output>
