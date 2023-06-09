@@ -80,6 +80,18 @@ function getSpotifyTimeData(data?: LanyardTypes.Spotify) {
     }
 }
 
+function generateUriStartsWith<T extends { [K: string]: string; }>(obj: T, defaultValue?: string) {
+    return {
+        check(value: string): T[keyof T] {
+            for(const key of Object.keys(obj)) {
+                if(value.startsWith(key))
+                    return obj[key] as any
+            }
+            return defaultValue as any
+        }
+    }
+}
+
 const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<string> => {
     let { data } = body;
 
@@ -220,7 +232,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 <div title="row-2" style="display: flex; flex-direction: row; align-items: center; gap: 4px;">
                     ${emojiStatusUrl ? `<img style="height: 14px; border-radius: 2px;" src="${emojiStatus}"/>` : ''}
                     <p style="font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
-                        ${customStatus.map(i => i.state ? i.state : '')}
+                        ${customStatus.map(i => i.state ? escape(i.state) : '')}
                     </p>
                 </div>
                 ` : ''}
@@ -234,6 +246,15 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
         'aimp': 'Listening to APIM',
     }[escape(activity?.name?.toLowerCase?.())] ?? 'Playing a game';
 
+    const getPresenceImage = (asset: string) => {
+        return generateUriStartsWith({
+            'mp:external/':`https://media.discordapp.net/external/${asset?.replace?.("mp:external/", "")}`,
+            'mp:attachments/':`https://media.discordapp.net/attachments/${asset?.replace?.("mp:attachments", "")}`
+        },
+            `https://cdn.discordapp.com/app-assets/${activity?.application_id}/${asset}.webp`
+        ).check(asset)
+    }
+    
     const presenceComponent = activity ? `
     <div style="
         display: flex; 
@@ -264,12 +285,13 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 margin-top: 1px;
                 margin-left: 8px;"> 
                 <div title="largeImageKey" style="
-                    background-image: url('data:image/png;base64,${
-                        activity.assets?.large_image ? await encodeBase64(
-                            activity.assets?.large_image?.startsWith("mp:external/")
-                        ? `https://media.discordapp.net/external/${activity.assets.large_image.replace("mp:external/", "")}` 
-                        : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.webp`
-                        ) : 'iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAV1SURBVHgB7Z09SGNLFMdH4/qVjZH3okFBEBT8qMRCwcJKtFBEEQQLK8FCQQyClaJglyZiI4iKjZYKdoqtgmBr4QdYBPLIZvUlRmPiRn33wAvsit47ms2Smf/5wRabOyoyvzl35tzjuTkvLy92wcCSKxhoWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABwWABw8gQIZ2dnudvb2/mnp6dF4XA4//Hx0UafJ5PJ3Ly8vOfCwsJkSUnJj9ra2vj8/PyDACFH9xYxBwcHeRsbG45AIGB/enqSing2m+3Z5XI9jI6ORjo6OpJCY7QVgFb8wsKC0+/3O0QaVFVVRX0+X7isrOxFaIiWAtCq93q95YlE4rfc4goKCpLT09PfdIwG2gmwtbWVv7q6Wi4b7mUhCcbGxkJ9fX0/hEZodQqglZ+JyScomiwtLbnpZwiN0CYC/O6w/x4UCTY3N//RZU+gTQRYWVlxZnryCfoZHo+nVGiCFuGMVn8wGJSKZE6nM15fX//Q2dn5kNrU0b7h/Pz8y8nJyddoNFpg9T3oZLG2thYbGRlJCMXR4hYwODj4t5UAdLbv7u6+npqaMk3yGEkg+9HRkWU0IZF2d3e/CcVR/hYgs/pp8icmJoJWk08YAtwb+YMgfY3ZuEgkUhgKhXKE4igvwN7enmXIbm9v//cjx7fW1tangYGB71bjDFm+CsVRXoDLy8tis+sUqmlViw8yPj4edzgcpvd4IwLkC8VRXgDjXm0zu97c3PzhyU/R0NBwZ3bdeKhkGX2yHeUFiMfjppu1pqamR/FJurq6TCMAPUkUiqP8L2CV9UsndWuV+89ExvFPo/wvYLZbt9rJMxoIUFxc/O4Kd7vdMZEGlCAyu66DYMoLMDs7+53y868/p88mJycjIg0ODw9NN3lURSQUR3kB6MxOiZvKyso7mnT6V11dfUuf0TXxSSjBdHFxYVpMYhwxP73BzBa0Lwn7LP39/WU3NzdFZmN6e3tDMtnFbIYFeAPjIY/TSDA5zcZQpNnf3w8IxeGy8FfITD7R1taW1v4iW+AI8BOyk6/L6ic4AvyP7OQTVBsoNAHmD0PMGBoa+isQCEg92TOeLYR1KgyFF6Cnp8ctUwVE0OT7fL5boRHQtwBa+bKTX1NTc6fb5BOwAtA9Xzbs0+Svr6/fCA2BFICyfLIbvsbGxltdJ5+AFIBKyGXG0T1/eXk5LDQGTgDZEnIdN3xvAScA/am41RiUySfgBKDmEGbXXS5XDGXyCTgBYrHYF7Prw8PDWuT4ZYETIJM1hCoCJwDXEP4KnACZrCFUETgBMllDqCKQ9QDHx8e2xcVF5/X1dSH9v6KiImY84o2mU0OoKlwQAg4XhIDDAoDDAoDDAoDDAoDDAoDDAoADVxVMXcS9Xq/D7/fbU63gKAtYWlqaQGgP/xqoRJBVO1mdu4K/B4wAsr2EdesFbAXMHmBnZ6dIppcwjZmZmUnrJRMqASPA1dWVdKQzxirfAFIWGAHu7++lmzr+ia7j2QIfA8GBEcCq7evP2O125Xv/yAIjgNvtjsuObWlpiQoQYI6BlADyeDzlVnsBnbp/yAATAerq6p7n5uZCb9UDpqDQT+3lBBCQJWH0VhB6PUzq9bHU8JFeI2MkimBCfwquCQSHj4HgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADgsADg/AcaTCq+Wg3S6QAAAABJRU5ErkJggg=='}'); 
+                    background-image: url('data:image/png;base64,${ 
+                        activity.assets?.large_image ? 
+                            await encodeBase64(
+                                getPresenceImage(activity.assets?.large_image)
+                            )
+                            : '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'
+                        }'); 
                         display: flex; 
                         background-size: cover; 
                         aspect-ratio: 1; 
@@ -282,10 +304,9 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                     ${ activity.assets?.small_image ? `<div title="smallImageText" style="
                         background-image: url('data:image/png;base64,${
                             await encodeBase64(
-                                activity.assets?.small_image?.startsWith("mp:external/")
-                            ? `https://media.discordapp.net/external/${activity.assets?.small_image.replace("mp:external/", "")}` 
-                            : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets?.small_image}.webp`
-                            )}'); 
+                                getPresenceImage(activity.assets?.small_image)
+                            )
+                            }'); 
                         background-size: contain; 
                         border-radius: 50%; 
                         width: 22px; 
