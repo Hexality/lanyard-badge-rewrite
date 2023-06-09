@@ -2,28 +2,18 @@ import Head from "next/head";
 import styled, { createGlobalStyle } from "styled-components";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useSmoothCount } from "use-smooth-count";
 
 export default function Home({ userCount }: { userCount: number }) {
     const [userId, setUserId] = useState<null | string>(null);
     const [userError, setUserError] = useState<string>();
     const [copyState, setCopyState] = useState("Copy");
-
+    
     const countRef = useRef<HTMLDivElement | null>(null);
-    const counter = useSmoothCount({ ref: countRef, target: userCount, duration: 3, curve: [0, 1, 0, 1] });
-
-    const copy = () => {
-        navigator.clipboard.writeText(
-            `[![Discord Presence](https://lanyard.cnrad.dev/api/${userId})](https://discord.com/users/${userId})`
-        );
-        setCopyState("Copied!");
-
-        setTimeout(() => setCopyState("Copy"), 1500);
-    };
 
     useEffect(() => {
         (async () => {
             try {
+                setUserId('422274807732633604')
                 await axios.get(`/api/${userId}`);
                 setUserError(undefined);
             } catch (error: any) {
@@ -33,6 +23,10 @@ export default function Home({ userCount }: { userCount: number }) {
             }
         })();
     }, [userId]);
+
+    function pageRedir() {
+        window.open('https://hexality.github.io');
+    }
 
     return (
         <>
@@ -56,43 +50,21 @@ export default function Home({ userCount }: { userCount: number }) {
             </Head>
             <Main>
                 <Container>
-                    <Title>lanyard profile readme 🏷️</Title>
-                    <Paragraph>Utilize Lanyard to display your Discord Presence in your GitHub Profile</Paragraph>
-                    <br />
-                    <Input onChange={el => setUserId(el.target.value)} placeholder="Enter your Discord ID" />
                     {userId ? (
                         <>
-                            <Output>
-                                [![Discord Presence](https://lanyard.cnrad.dev/api/{userId}
-                                )](https://discord.com/users/{userId})
-                            </Output>
-                            <ActionButton onClick={copy}>{copyState}</ActionButton>
-                            <a
-                                href="https://github.com/cnrad/lanyard-profile-readme#options"
-                                target="_blank"
-                                rel="noreferrer"
+                            <Example
+                                src={`/api/${userId}`}
+                                style={{ color: "#ff8787" }}
                             >
-                                <ActionButton>Options</ActionButton>
-                            </a>
-                            <a
-                                style={{ textDecoration: "none" }}
-                                target="_blank"
-                                href={userError && "https://discord.gg/lanyard"}
-                                rel="noreferrer"
-                            >
-                                <Example
-                                    src={`/api/${userId}`}
-                                    alt={`${userError || "Please provide a valid user ID!"}`}
-                                    style={{ color: "#ff8787" }}
-                                />
-                            </a>
+                            </Example>
                         </>
                     ) : null}
                 </Container>
             </Main>
             <FooterStat>
-                Lanyard Profile Readme has <div style={{ fontWeight: "bold", width: "2.75rem" }} ref={countRef} /> total
-                users!
+                <Redirect >
+                    <MyLogo onClick={() => console.log('a')} src="https://hexality.github.io/src/content/images/logo.svg"/>
+                </Redirect>
             </FooterStat>
         </>
     );
@@ -132,133 +104,55 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Main = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: start;
-    margin: 0;
+    justify-content: center;
+    flex-direction: column;
     padding: 0;
-    box-sizing: border-box;
-    max-width: 100vw;
-    min-height: 100vh;
+    margin: 0;
     background: url('https://i.imgur.com/k8g0YPh.jpg');
     background-size: cover;
-`;
-
-const Container = styled.div`
-    border-radius: 7px;
-    margin-top: 60px;
-    width: 80%;
-    max-width: 450px;
-`;
-
-const Title = styled.h1`
-    text-align: left;
-    font-size: 2rem;
-    font-weight: 600;
-    margin: 5px 0;
-    color: #cecece;
-`;
-
-const Paragraph = styled.p`
-    color: #aaabaf;
-    font-size: 1rem;
-`;
-
-const Input = styled.input`
-    text-align: left;
-    border-radius: 8px;
-    border: none;
-    width: 100%;
-    font-size: 0.9rem;
-    padding: 5px 10px;
-    color: #aaabaf;
-    border: solid 1px #333;
-    background: #000;
-    box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
-    transition: all ease-in-out 0.2s;
-
-    &:focus {
-        outline: 0;
-        border-color: #ccc;
-    }
-`;
-
-const Output = styled.div`
-    margin: 15px 0;
-    color: #aaabaf;
-    word-break: break-word;
-    border-radius: 8px;
-    border: solid 1px #333;
-    padding: 8px;
-    background: #000;
-    box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
-    font-family: Monospace, sans-serif;
-`;
-
-const ActionButton = styled.button`
-    font-size: 0.9rem;
-    padding: 5px 25px;
-    margin-right: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #888;
-    border: solid 1px #333;
-    background: transparent;
-    transition: all ease-in-out 0.1s;
-
-    &:hover {
-        color: #e6e6e6;
-        border-color: #e6e6e6;
-    }
-    &:active {
-        color: #fff;
-        border-color: #fff;
-    }
+    box-sizing: border-box;
+    `;
+    
+    const Container = styled.div`
+    backdrop-filter: blur(240px);
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 0 16px 1px rgba(0,0,0,.5)
+    border: 4px solid #c9a14f;
 `;
 
 const Example = styled.img`
     display: block;
-    margin: 30px auto 0px;
     max-width: 100%;
 `;
 
 const FooterStat = styled.div`
-    position: absolute;
+    position: fixed;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    line-height: 1rem;
-    bottom: 1rem;
-    left: 50%;
-    transform: translate(-50%, 0);
-    background: #000;
-    padding: 1rem 1.25rem;
-    color: #fff;
-    border-radius: 0.5rem;
+    top: 8px;
+    left: 8px;
+    padding: 4px;
+    border-radius: 50%;
     text-align: center;
-    box-shadow: 0 2px 15px -10px #a21caf;
-    min-width: 400px;
+    transition: background .15s ease-out;
+    opacity: .5;
+`;
 
-    @media (max-width: 400px) {
-        font-size: 14px;
-        min-width: 365px;
-        padding: 0.75rem 1rem;
-    }
+const Redirect = styled.a`
+`
 
-    &:before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 0.35rem;
-        border: 2px solid transparent;
-        background: linear-gradient(45deg, #be123c, #6b21a8, #3730a3) border-box;
-        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
+const MyLogo = styled.img`
+    width: 56px;
+    height: 56px;
+    backdrop-filter: blur(240px);
 `;

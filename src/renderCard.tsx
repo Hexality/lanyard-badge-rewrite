@@ -198,10 +198,10 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
             </div>
             <div title="header-box" style="width: 100%; padding: 4px 8px 7px 8px; display: flex; align-self: center; flex-direction: column; gap: 2px;">
                 <div title="row-1" style="display: flex; flex-direction: row; gap: 6px;">
-                    <p style="font-family: 'Segoe UI Variable Display', sans-serif; font-weight: 600; font-size: 16px; margin: 0;">
+                    <p style="font-family: 'Segoe UI Variable Display', Montserrat, sans-serif; font-weight: 600; font-size: 16px; margin: 0;">
                         ${(data.discord_user.discriminator === '0') ? escape(data.discord_user.display_name) : escape(data.discord_user.username) }
                     </p>
-                    ${ discrim ? `<div title="username-box" style="display: flex; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605); font-family: 'Segoe UI Variable Small'; font-size: 10px; align-items: center; padding: 2px; border-radius: 2px;">
+                    ${ discrim ? `<div title="username-box" style="display: flex; border: 1px solid rgba(255,255,255, 0.0698); border-top: 1px solid rgba(255,255,255,0.0903); background: rgba(255,255,255,0.0605); font-family: 'Segoe UI Variable Small', Montserrat, sans-serif; font-size: 10px; align-items: center; padding: 2px; border-radius: 2px;">
                         <p style="margin: 0;">
                             ${!(data.discord_user.discriminator === '0') ? "#"+data.discord_user.discriminator : "@"+data.discord_user.username}
                         </p>
@@ -219,7 +219,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 ${!(customStatus.length === 0) ? `
                 <div title="row-2" style="display: flex; flex-direction: row; align-items: center; gap: 4px;">
                     ${emojiStatusUrl ? `<img style="height: 14px; border-radius: 2px;" src="${emojiStatus}"/>` : ''}
-                    <p style="font-family: 'Segoe UI Variable Text'; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
+                    <p style="font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin: 0;">
                         ${customStatus.map(i => i.state ? i.state : '')}
                     </p>
                 </div>
@@ -253,7 +253,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 margin: 0; 
                 font-weight: 600; 
                 font-size: 14px; 
-                font-family: 'Segoe UI Variable Display'; 
+                font-family: 'Segoe UI Variable Display', Montserrat, sans-serif; 
                 margin-left: 8px; 
                 margin-top: 4px;">
                 ${presenceTitle ? presenceTitle : ''}
@@ -302,7 +302,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                     width: 280px; 
                     margin-top: -5px">
                     ${activity.name ? `<div title="activityName" style="
-                        font-family: 'Segoe UI Variable Text', sans-serif; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 13px; 
                         font-weight: 600;">
                         <p style="
@@ -314,7 +314,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                             ${escape(activity.name)}</p>
                     </div>` : ''}
                     ${activity.details ? `<div title="presenceDetails" style="
-                        font-family: 'Segoe UI Variable Text'; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 12px; 
                         font-weight: 400 ;">
                         <p style="
@@ -327,7 +327,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                         </p>
                     </div>` : ''}
                     ${activity.state ? `<div title="presenceState" style="
-                        font-family: 'Segoe UI Variable Text'; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 12px; 
                         font-weight: 400 ;">
                         <p style="
@@ -340,7 +340,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                         </p>
                     </div>` : ''}
                     ${activity.timestamps ? `<div title="presenceTimeStamp" style="
-                        font-family: 'Segoe UI Variable Text'; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 12px; 
                         font-weight: 400 ;">
                         <p style="
@@ -378,7 +378,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                 margin: 0; 
                 font-weight: 600; 
                 font-size: 14px; 
-                font-family: 'Segoe UI Variable Display'; 
+                font-family: 'Segoe UI Variable Display', Montserrat, sans-serif; 
                 margin-top: 4px;
                 margin-left: 8px;">Listening to Spotify</p>
             <div title="presenceData" style="
@@ -404,13 +404,13 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                     width: 280px; 
                     margin-top: -5px">
                     <div title="activityName" style="
-                        font-family: 'Segoe UI Variable Text', sans-serif; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 13px; 
                         font-weight: 600;">
                         <p style="margin: 0;">${spotifyData.song ? escape(spotifyData.song):''}</p>
                     </div>
                     <div title="presenceDetails" style="
-                        font-family: 'Segoe UI Variable Text'; 
+                        font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                         font-size: 12px; 
                         font-weight: 400 ;">
                         <p style="margin: 0;">
@@ -418,7 +418,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
                             </p>
                             </div>
                             <div title="presenceState" style="
-                                font-family: 'Segoe UI Variable Text'; 
+                                font-family: 'Segoe UI Variable Text', Montserrat, sans-serif; 
                                 font-size: 12px; 
                                 font-weight: 400 ;">
                             <p style="margin: 0;">
@@ -482,7 +482,7 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
             background-color: rgba(30, 30, 30, 0.8 ); 
             backdrop-filter: blur(240px); 
             -webkit-backdrop-filter: blur(240px);
-            font-family: 'Segoe UI Variable Text','Century Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Segoe UI Variable Text', Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             font-size: 16px; 
             color: #fff; 
             box-shadow: 0 0 8px rgba(0,0,0, 0.55);">
