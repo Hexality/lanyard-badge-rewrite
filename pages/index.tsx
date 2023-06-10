@@ -19,14 +19,10 @@ export default function Home({ userCount }: { userCount: number }) {
             } catch (error: any) {
                 console.log(error.response);
                 if (error.response.status === 404 && error.response.data.code == "user_not_monitored")
-                    setUserError(`User not monitored by Lanyard, click to join the discord`);
+                    setUserError(`User not monitored, join https://discord.gg/lanyard`);
             }
         })();
     }, [userId]);
-
-    function pageRedir() {
-        window.open('https://hexality.github.io');
-    }
 
     return (
         <>
@@ -38,14 +34,14 @@ export default function Home({ userCount }: { userCount: number }) {
                     rel="stylesheet"
                 />
                 <title>Lanyard for GitHub Profile</title>
-                <meta property="og:title" content="Lanyard for GitHub Profile" key="title" />
+                <meta property="og:title" content="Lanyard" key="title" />
                 <meta
                     name="description"
-                    content="Utilize Lanyard to display your Discord Presence in your GitHub Profile"
+                    content="Lanyard internals: Hexality"
                 />
                 <meta
                     name="og:description"
-                    content="Utilize Lanyard to display your Discord Presence in your GitHub Profile"
+                    content="Lanyard internals: Hexality"
                 />
             </Head>
             <Main>
