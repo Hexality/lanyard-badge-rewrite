@@ -6,7 +6,6 @@ import * as LanyardTypes from "./LanyardTypes";
 import { encodeBase64 } from "./toBase64";
 import { blue, green, gray, gold, red } from "./defaultAvatars";
 import escape from "escape-html";
-import { useTheme } from "styled-components";
 
 type Parameters = {
     theme?: string;
@@ -124,8 +123,6 @@ const renderCard = async (body: LanyardTypes.Root, params: Parameters): Promise<
         theme = "dark",
         borderRadius = 8,
         idleBox = false;
-
-
 
     if (data.activities[0]?.emoji?.animated) statusExtension = "gif";
     if (data.discord_user.avatar && data.discord_user.avatar.startsWith("a_")) avatarExtension = "gif";
