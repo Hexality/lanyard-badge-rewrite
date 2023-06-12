@@ -3,5 +3,5 @@
 
 This repository is a manually forked version of [cnrad/lanyard-profile-readme](https://github.com/cnrad/lanyard-profile-readme) that includes some tweaks and core changes for my personal use.  
 
-_Special thanks to [@Phineas](https://github.com/Phineas/) for creating Lanyard, and cnrad for originally making this project._
+_Special thanks to [@Phineas](https://github.com/Phineas/) for creating Lanyard, and [@cnrad](https://github.com/cnrad) for originally making this project._
 </div>
