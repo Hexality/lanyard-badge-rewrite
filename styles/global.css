@@ -1,0 +1,17 @@
+@media only screen and (max-w) {
+    
+}
+
+body {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+}
+
+.navHeader {
+    /*background-color: aliceblue;*/
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 50px;
+}

@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             });
 
         try {
-            getUser = await axios(`https://api.lanyard.rest/v1/users/${userId}`);
+            getUser = await axios(`https://shizue.hop.sh/v1/users/${userId}`);
         } catch (error: any) {
             if (error.response.data && error.response.data.error.message)
                 return res
